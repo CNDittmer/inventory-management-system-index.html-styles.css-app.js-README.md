@@ -1,9 +1,11 @@
 * { box-sizing: border-box; }
+
 :root {
   font-family: "Times New Roman", Times, serif;
   color: #202124;
   background: #f4f6f8;
 }
+
 body { margin: 0; }
 .hidden { display: none !important; }
 
@@ -14,17 +16,22 @@ body { margin: 0; }
   padding: 24px;
   background: linear-gradient(135deg, #263238, #455a64);
 }
+
 .login-card {
   width: min(430px, 100%);
   background: white;
   border-radius: 12px;
   padding: 32px;
-  box-shadow: 0 18px 50px rgba(0,0,0,.3);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .3);
 }
-.login-card h1, .login-card h2, .login-card .subtle { text-align: center; }
+
+.login-card h1,
+.login-card h2,
+.login-card .version-label { text-align: center; }
+
 .login-card h1 { margin-bottom: 4px; }
 .login-card h2 { margin: 0; font-size: 1.25rem; }
-.subtle { color: #5f6368; }
+.version-label { color: #5f6368; font-weight: bold; }
 
 .credentials {
   margin-top: 20px;
@@ -34,6 +41,7 @@ body { margin: 0; }
   border-radius: 6px;
   text-align: center;
 }
+
 .credentials p { margin: 5px 0; }
 
 .site-header {
@@ -45,59 +53,98 @@ body { margin: 0; }
   background: #263238;
   color: white;
 }
+
 .site-header h1 { margin: 0; }
 .site-header p { margin: 5px 0 0; }
 .session-info { display: flex; align-items: center; gap: 12px; }
+
+.app-nav {
+  display: flex;
+  gap: 8px;
+  padding: 12px 5%;
+  background: white;
+  border-bottom: 1px solid #d7dce0;
+}
+
+.nav-button {
+  background: #eceff1;
+  color: #263238;
+}
+
+.nav-button:hover,
+.nav-button.active {
+  background: #1565c0;
+  color: white;
+}
 
 main {
   width: 92%;
   max-width: 1500px;
   margin: 25px auto;
 }
-.dashboard {
+
+.dashboard,
+.analytics-kpis {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 18px;
   margin-bottom: 20px;
 }
-.dashboard-card, .panel {
+
+.analytics-kpis { grid-template-columns: repeat(4, 1fr); }
+
+.dashboard-card,
+.panel {
   background: white;
   border: 1px solid #d7dce0;
   border-radius: 8px;
 }
+
 .dashboard-card { padding: 20px; text-align: center; }
 .dashboard-card h2 { margin: 0; font-size: 2rem; }
 .warning-card { border-left: 7px solid #c62828; }
+
 .panel { margin-bottom: 20px; padding: 24px; }
 
-.section-heading {
+.section-heading,
+.analytics-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
 }
+
 .badge {
   padding: 6px 10px;
   border-radius: 999px;
   background: #eceff1;
   font-weight: bold;
 }
-.form-grid, .search-grid {
+
+.form-grid,
+.search-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
+
 .form-group { display: flex; flex-direction: column; }
 label { margin-bottom: 6px; font-weight: bold; }
-input, select, button {
+
+input,
+select,
+button {
   min-height: 42px;
   padding: 9px;
   font: inherit;
 }
-input, select {
+
+input,
+select {
   border: 1px solid #9da5ab;
   border-radius: 4px;
 }
+
 button {
   border: 0;
   border-radius: 4px;
@@ -105,6 +152,7 @@ button {
   color: white;
   cursor: pointer;
 }
+
 button:hover { background: #0d47a1; }
 button:disabled { background: #9e9e9e; cursor: not-allowed; }
 .secondary { background: #5f6368; }
@@ -112,47 +160,167 @@ button:disabled { background: #9e9e9e; cursor: not-allowed; }
 .danger { background: #c62828; }
 .danger:hover { background: #8e0000; }
 .full-width { width: 100%; margin-top: 12px; }
-.button-row { display: flex; gap: 10px; margin-top: 18px; }
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.wrap-buttons { flex-wrap: wrap; }
 
 .message { padding: 12px; border-radius: 4px; }
+
 .message.success {
   background: #e8f5e9;
   border: 1px solid #2e7d32;
   color: #1b5e20;
 }
+
 .message.error {
   background: #ffebee;
   border: 1px solid #c62828;
   color: #8e0000;
 }
+
 .table-container { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
-th, td {
+
+th,
+td {
   padding: 10px;
   border: 1px solid #c7ccd1;
   text-align: left;
   vertical-align: middle;
 }
+
 th { background: #eceff1; }
 .low-stock-row { background: #fff3e0; }
 .status-low { color: #c62828; font-weight: bold; }
 .status-normal { color: #2e7d32; font-weight: bold; }
-.action-buttons { display: flex; gap: 6px; }
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+}
+
 .action-buttons button {
   min-height: 34px;
   padding: 5px 10px;
   font-size: .9rem;
 }
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.bar-chart {
+  display: grid;
+  gap: 13px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 3fr 55px;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-track {
+  height: 22px;
+  background: #eceff1;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  min-width: 2px;
+  background: #1565c0;
+  border-radius: 999px;
+}
+
+.bar-value { text-align: right; font-weight: bold; }
+
+.status-chart {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.status-box {
+  padding: 24px;
+  border-radius: 8px;
+  text-align: center;
+  background: #e8f5e9;
+  border: 1px solid #2e7d32;
+}
+
+.status-box.low {
+  background: #ffebee;
+  border-color: #c62828;
+}
+
+.status-box strong {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+
+.analytics-list {
+  display: grid;
+  gap: 10px;
+}
+
+.analytics-list-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #d7dce0;
+  border-left: 5px solid #c62828;
+  border-radius: 5px;
+  background: #fffaf5;
+}
+
+.empty-state {
+  padding: 18px;
+  border: 1px dashed #9da5ab;
+  border-radius: 6px;
+  text-align: center;
+  color: #5f6368;
+}
+
 footer {
   padding: 20px;
   background: #263238;
   color: white;
   text-align: center;
 }
+
 @media (max-width: 900px) {
-  .site-header, .section-heading, .button-row {
+  .site-header,
+  .section-heading,
+  .analytics-header,
+  .button-row,
+  .app-nav {
     flex-direction: column;
     align-items: stretch;
   }
-  .dashboard, .form-grid, .search-grid { grid-template-columns: 1fr; }
+
+  .dashboard,
+  .analytics-kpis,
+  .form-grid,
+  .search-grid,
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bar-row {
+    grid-template-columns: 1fr;
+  }
+
+  .bar-value { text-align: left; }
 }

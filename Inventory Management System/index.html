@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC Office Supply Inventory System — Version 2</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <h1>ABC Office Supply Co.</h1>
+      <h2>Inventory Management System</h2>
+      <p class="version-label">Version 2</p>
+
+      <form id="loginForm">
+        <label for="username">Username</label>
+        <input id="username" type="text" autocomplete="username" required>
+
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+
+        <button type="submit">Log In</button>
+      </form>
+
+      <button id="guestButton" type="button" class="secondary full-width">
+        Click Here for Guest Access
+      </button>
+
+      <p id="loginMessage" class="message error hidden" aria-live="polite"></p>
+
+      <div class="credentials">
+        <strong>Testing credentials</strong>
+        <p>Admin / Passw0rd1</p>
+        <p>User / Password</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="application" class="hidden">
+    <header class="site-header">
+      <div>
+        <h1>ABC Office Supply Co.</h1>
+        <p>Inventory Management System — Version 2</p>
+      </div>
+
+      <div class="session-info">
+        <span id="welcomeText">Welcome</span>
+        <button id="logoutButton" type="button" class="secondary">Log Out</button>
+      </div>
+    </header>
+
+    <nav class="app-nav" aria-label="Application sections">
+      <button type="button" class="nav-button active" data-section="inventorySection">Inventory</button>
+      <button type="button" class="nav-button" data-section="analyticsSection">Analytics Dashboard</button>
+      <button type="button" class="nav-button" data-section="buildStatusSection">Version 2 Status</button>
+    </nav>
+
+    <main>
+      <section id="inventorySection" class="app-section">
+        <section class="dashboard">
+          <article class="dashboard-card">
+            <h2 id="totalItems">0</h2>
+            <p>Total Inventory Items</p>
+          </article>
+          <article class="dashboard-card">
+            <h2 id="totalQuantity">0</h2>
+            <p>Total Units in Stock</p>
+          </article>
+          <article class="dashboard-card warning-card">
+            <h2 id="lowStockCount">0</h2>
+            <p>Low-Stock Items</p>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <h2>Add or Update Inventory Item</h2>
+            <span id="roleBadge" class="badge"></span>
+          </div>
+
+          <p id="message" class="message hidden" aria-live="polite"></p>
+
+          <form id="inventoryForm">
+            <input type="hidden" id="editItemId">
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="itemName">Item Name *</label>
+                <input type="text" id="itemName" maxlength="100" required>
+              </div>
+
+              <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" maxlength="255">
+              </div>
+
+              <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" required>
+                  <option value="">Select a category</option>
+                  <option>Paper Products</option>
+                  <option>Writing Supplies</option>
+                  <option>Office Equipment</option>
+                  <option>Computer Accessories</option>
+                  <option>Cleaning Supplies</option>
+                  <option>Shipping Supplies</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="location">Storage Location *</label>
+                <select id="location" required>
+                  <option value="">Select a location</option>
+                  <option>Warehouse A</option>
+                  <option>Warehouse B</option>
+                  <option>Stockroom 1</option>
+                  <option>Stockroom 2</option>
+                  <option>Front Office</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="quantity">Quantity *</label>
+                <input type="number" id="quantity" min="0" required>
+              </div>
+
+              <div class="form-group">
+                <label for="reorderLevel">Reorder Level *</label>
+                <input type="number" id="reorderLevel" min="0" required>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button type="submit" id="saveButton">Save Inventory Item</button>
+              <button type="button" id="cancelButton" class="secondary hidden">Cancel Edit</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Search, Filter, and Reports</h2>
+
+          <div class="search-grid">
+            <div class="form-group">
+              <label for="searchInput">Search by Item Name</label>
+              <input type="text" id="searchInput" placeholder="Enter item name">
+            </div>
+
+            <div class="form-group">
+              <label for="categoryFilter">Filter by Category</label>
+              <select id="categoryFilter">
+                <option value="">All Categories</option>
+                <option>Paper Products</option>
+                <option>Writing Supplies</option>
+                <option>Office Equipment</option>
+                <option>Computer Accessories</option>
+                <option>Cleaning Supplies</option>
+                <option>Shipping Supplies</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="stockFilter">Stock Status</label>
+              <select id="stockFilter">
+                <option value="">All Items</option>
+                <option value="low">Low Stock Only</option>
+                <option value="normal">Normal Stock Only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="button-row wrap-buttons">
+            <button type="button" id="lowStockReportButton">Generate Low-Stock Report</button>
+            <button type="button" id="exportExcelButton">Export to Excel — Version 2</button>
+            <button type="button" id="resetFiltersButton" class="secondary">Reset Filters</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <h2>Inventory Records</h2>
+            <span id="recordCount">0 records displayed</span>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Item Name</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Location</th>
+                  <th>Quantity</th>
+                  <th>Reorder Level</th>
+                  <th>Status</th>
+                  <th>Last Updated</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="analyticsSection" class="app-section hidden">
+        <section class="panel analytics-header">
+          <div>
+            <h2>Analytics Dashboard</h2>
+            <p>Version 2 inventory summary based on the current browser data.</p>
+          </div>
+          <button type="button" id="refreshAnalyticsButton">Refresh Analytics</button>
+        </section>
+
+        <section class="analytics-kpis">
+          <article class="dashboard-card">
+            <h2 id="analyticsTotalItems">0</h2>
+            <p>Unique Items</p>
+          </article>
+          <article class="dashboard-card">
+            <h2 id="analyticsTotalUnits">0</h2>
+            <p>Total Units</p>
+          </article>
+          <article class="dashboard-card warning-card">
+            <h2 id="analyticsLowStock">0</h2>
+            <p>Low-Stock Items</p>
+          </article>
+          <article class="dashboard-card">
+            <h2 id="analyticsHealthRate">0%</h2>
+            <p>Healthy Stock Rate</p>
+          </article>
+        </section>
+
+        <section class="analytics-grid">
+          <article class="panel">
+            <h3>Units by Category</h3>
+            <div id="categoryChart" class="bar-chart"></div>
+          </article>
+
+          <article class="panel">
+            <h3>Units by Storage Location</h3>
+            <div id="locationChart" class="bar-chart"></div>
+          </article>
+
+          <article class="panel">
+            <h3>Stock Status</h3>
+            <div id="stockStatusChart" class="status-chart"></div>
+          </article>
+
+          <article class="panel">
+            <h3>Low-Stock Attention List</h3>
+            <div id="analyticsLowStockList" class="analytics-list"></div>
+          </article>
+        </section>
+      </section>
+
+      <section id="buildStatusSection" class="app-section hidden">
+        <section class="panel">
+          <h2>Version 2 Build Status</h2>
+          <p><strong>Build status:</strong> Feature complete and ready for testing.</p>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr><th>Feature</th><th>Status</th><th>Ready for Testing</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Login and guest access</td><td>Complete</td><td>Yes</td></tr>
+                <tr><td>Add and view inventory</td><td>Complete</td><td>Yes</td></tr>
+                <tr><td>Update quantities</td><td>Complete</td><td>Yes</td></tr>
+                <tr><td>Categories and locations</td><td>Complete</td><td>Yes</td></tr>
+                <tr><td>Search and filtering</td><td>Complete</td><td>Yes</td></tr>
+                <tr><td>Low-stock reporting</td><td>Complete</td><td>Yes</td></tr>
+                <tr><td>Excel export labeled Version 2</td><td>Complete</td><td>Yes</td></tr>
+                <tr><td>Analytics dashboard</td><td>Complete</td><td>Yes</td></tr>
+                <tr><td>Role-based restrictions</td><td>Complete</td><td>Yes</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      ABC Office Supply Co. Inventory Management System | Version 2
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

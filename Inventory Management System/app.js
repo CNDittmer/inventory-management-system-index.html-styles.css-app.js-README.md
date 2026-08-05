@@ -29,12 +29,23 @@ const messageBox = document.getElementById("message");
 const saveButton = document.getElementById("saveButton");
 const cancelButton = document.getElementById("cancelButton");
 const lowStockReportButton = document.getElementById("lowStockReportButton");
+const exportExcelButton = document.getElementById("exportExcelButton");
 const resetFiltersButton = document.getElementById("resetFiltersButton");
 
 const totalItemsElement = document.getElementById("totalItems");
 const totalQuantityElement = document.getElementById("totalQuantity");
 const lowStockCountElement = document.getElementById("lowStockCount");
 const recordCountElement = document.getElementById("recordCount");
+
+const analyticsTotalItems = document.getElementById("analyticsTotalItems");
+const analyticsTotalUnits = document.getElementById("analyticsTotalUnits");
+const analyticsLowStock = document.getElementById("analyticsLowStock");
+const analyticsHealthRate = document.getElementById("analyticsHealthRate");
+const categoryChart = document.getElementById("categoryChart");
+const locationChart = document.getElementById("locationChart");
+const stockStatusChart = document.getElementById("stockStatusChart");
+const analyticsLowStockList = document.getElementById("analyticsLowStockList");
+const refreshAnalyticsButton = document.getElementById("refreshAnalyticsButton");
 
 let currentRole = null;
 let currentUser = null;
@@ -94,7 +105,6 @@ function showLoginError(text) {
 function startSession(user, role) {
   currentUser = user;
   currentRole = role;
-
   loginScreen.classList.add("hidden");
   application.classList.remove("hidden");
 
@@ -109,6 +119,7 @@ function startSession(user, role) {
 
   resetForm();
   renderInventory();
+  renderAnalytics();
 }
 
 function endSession() {
@@ -120,7 +131,7 @@ function endSession() {
   resetForm();
 }
 
-loginForm.addEventListener("submit", (event) => {
+loginForm.addEventListener("submit", event => {
   event.preventDefault();
 
   const username = document.getElementById("username").value.trim();
@@ -140,6 +151,20 @@ guestButton.addEventListener("click", () => {
 });
 
 logoutButton.addEventListener("click", endSession);
+
+document.querySelectorAll(".nav-button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".nav-button").forEach(item => item.classList.remove("active"));
+    document.querySelectorAll(".app-section").forEach(section => section.classList.add("hidden"));
+
+    button.classList.add("active");
+    document.getElementById(button.dataset.section).classList.remove("hidden");
+
+    if (button.dataset.section === "analyticsSection") {
+      renderAnalytics();
+    }
+  });
+});
 
 function generateItemId() {
   return inventory.length
@@ -222,13 +247,9 @@ function renderInventory() {
         <td>${formatDate(item.lastUpdated)}</td>
         <td>
           <div class="action-buttons">
-            <button type="button" onclick="editItem(${item.id})" ${editDisabled}>
-              Edit
-            </button>
+            <button type="button" onclick="editItem(${item.id})" ${editDisabled}>Edit</button>
             <button type="button" class="danger"
-              onclick="deleteItem(${item.id})" ${deleteDisabled}>
-              Delete
-            </button>
+              onclick="deleteItem(${item.id})" ${deleteDisabled}>Delete</button>
           </div>
         </td>
       `;
@@ -317,6 +338,7 @@ function deleteItem(itemId) {
   saveInventory();
   resetForm();
   renderInventory();
+  renderAnalytics();
   showMessage("Inventory item deleted successfully.", "success");
 }
 
@@ -398,6 +420,7 @@ inventoryForm.addEventListener("submit", event => {
   saveInventory();
   resetForm();
   renderInventory();
+  renderAnalytics();
 });
 
 searchInput.addEventListener("input", renderInventory);
@@ -421,5 +444,200 @@ resetFiltersButton.addEventListener("click", () => {
   stockFilter.value = "";
   renderInventory();
 });
+
+function summarizeBy(field) {
+  return inventory.reduce((summary, item) => {
+    const key = item[field] || "Unassigned";
+    summary[key] = (summary[key] || 0) + Number(item.quantity);
+    return summary;
+  }, {});
+}
+
+function renderBarChart(container, summary) {
+  const entries = Object.entries(summary).sort((a, b) => b[1] - a[1]);
+  container.innerHTML = "";
+
+  if (!entries.length) {
+    container.innerHTML = '<div class="empty-state">No data is available.</div>';
+    return;
+  }
+
+  const maximum = Math.max(...entries.map(entry => entry[1]), 1);
+
+  entries.forEach(([label, value]) => {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+
+    const percentage = Math.round((value / maximum) * 100);
+
+    row.innerHTML = `
+      <span>${escapeHtml(label)}</span>
+      <div class="bar-track" aria-label="${escapeHtml(label)}: ${value} units">
+        <div class="bar-fill" style="width: ${percentage}%"></div>
+      </div>
+      <span class="bar-value">${value}</span>
+    `;
+
+    container.appendChild(row);
+  });
+}
+
+function renderAnalytics() {
+  const totalItems = inventory.length;
+  const totalUnits = inventory.reduce((sum, item) => sum + Number(item.quantity), 0);
+  const lowItems = inventory.filter(isLowStock);
+  const healthyItems = totalItems - lowItems.length;
+  const healthyRate = totalItems ? Math.round((healthyItems / totalItems) * 100) : 0;
+
+  analyticsTotalItems.textContent = totalItems;
+  analyticsTotalUnits.textContent = totalUnits;
+  analyticsLowStock.textContent = lowItems.length;
+  analyticsHealthRate.textContent = `${healthyRate}%`;
+
+  renderBarChart(categoryChart, summarizeBy("category"));
+  renderBarChart(locationChart, summarizeBy("location"));
+
+  stockStatusChart.innerHTML = `
+    <div class="status-box">
+      <strong>${healthyItems}</strong>
+      <span>Healthy Items</span>
+    </div>
+    <div class="status-box low">
+      <strong>${lowItems.length}</strong>
+      <span>Low-Stock Items</span>
+    </div>
+  `;
+
+  analyticsLowStockList.innerHTML = "";
+
+  if (!lowItems.length) {
+    analyticsLowStockList.innerHTML =
+      '<div class="empty-state">No items are currently below or at their reorder level.</div>';
+  } else {
+    lowItems
+      .sort((a, b) => Number(a.quantity) - Number(b.quantity))
+      .forEach(item => {
+        const entry = document.createElement("div");
+        entry.className = "analytics-list-item";
+        entry.innerHTML = `
+          <span><strong>${escapeHtml(item.itemName)}</strong><br>
+          ${escapeHtml(item.location)}</span>
+          <span>${item.quantity} in stock / reorder at ${item.reorderLevel}</span>
+        `;
+        analyticsLowStockList.appendChild(entry);
+      });
+  }
+}
+
+refreshAnalyticsButton.addEventListener("click", renderAnalytics);
+
+function xmlEscape(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
+function excelCell(value, type = "String", styleId = "") {
+  const styleAttribute = styleId ? ` ss:StyleID="${styleId}"` : "";
+  return `<Cell${styleAttribute}><Data ss:Type="${type}">${xmlEscape(value)}</Data></Cell>`;
+}
+
+function exportToExcelVersion2() {
+  const exportedItems = getFilteredInventory();
+  const generatedAt = new Date().toLocaleString();
+
+  const rows = exportedItems.map(item => `
+    <Row>
+      ${excelCell(item.id, "Number")}
+      ${excelCell(item.itemName)}
+      ${excelCell(item.description || "")}
+      ${excelCell(item.category)}
+      ${excelCell(item.location)}
+      ${excelCell(item.quantity, "Number")}
+      ${excelCell(item.reorderLevel, "Number")}
+      ${excelCell(isLowStock(item) ? "Low Stock" : "In Stock")}
+      ${excelCell(formatDate(item.lastUpdated))}
+    </Row>
+  `).join("");
+
+  const workbook = `<?xml version="1.0"?>
+  <?mso-application progid="Excel.Sheet"?>
+  <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+    xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:x="urn:schemas-microsoft-com:office:excel"
+    xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+    <Styles>
+      <Style ss:ID="Title">
+        <Font ss:Bold="1" ss:Size="16"/>
+      </Style>
+      <Style ss:ID="Header">
+        <Font ss:Bold="1"/>
+        <Interior ss:Color="#D9EAF7" ss:Pattern="Solid"/>
+        <Borders>
+          <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+        </Borders>
+      </Style>
+    </Styles>
+    <Worksheet ss:Name="Version 2 Inventory">
+      <Table>
+        <Column ss:Width="45"/>
+        <Column ss:Width="130"/>
+        <Column ss:Width="200"/>
+        <Column ss:Width="120"/>
+        <Column ss:Width="110"/>
+        <Column ss:Width="70"/>
+        <Column ss:Width="85"/>
+        <Column ss:Width="80"/>
+        <Column ss:Width="140"/>
+        <Row>
+          ${excelCell("ABC Office Supply Co. Inventory Management System — Version 2", "String", "Title")}
+        </Row>
+        <Row>
+          ${excelCell(`Generated: ${generatedAt}`)}
+        </Row>
+        <Row>
+          ${excelCell(`Records exported: ${exportedItems.length}`)}
+        </Row>
+        <Row></Row>
+        <Row>
+          ${excelCell("ID", "String", "Header")}
+          ${excelCell("Item Name", "String", "Header")}
+          ${excelCell("Description", "String", "Header")}
+          ${excelCell("Category", "String", "Header")}
+          ${excelCell("Location", "String", "Header")}
+          ${excelCell("Quantity", "String", "Header")}
+          ${excelCell("Reorder Level", "String", "Header")}
+          ${excelCell("Status", "String", "Header")}
+          ${excelCell("Last Updated", "String", "Header")}
+        </Row>
+        ${rows}
+      </Table>
+    </Worksheet>
+  </Workbook>`;
+
+  const blob = new Blob([workbook], {
+    type: "application/vnd.ms-excel;charset=utf-8"
+  });
+
+  const link = document.createElement("a");
+  const dateText = new Date().toISOString().slice(0, 10);
+
+  link.href = URL.createObjectURL(blob);
+  link.download = `ABC_Inventory_Version_2_${dateText}.xls`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
+
+  showMessage(
+    `Version 2 Excel export created with ${exportedItems.length} record(s).`,
+    "success"
+  );
+}
+
+exportExcelButton.addEventListener("click", exportToExcelVersion2);
 
 saveInventory();
